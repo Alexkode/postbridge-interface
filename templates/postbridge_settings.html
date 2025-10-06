@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-back {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-back:hover {
+            background: #475569;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            font-size: 1.1em;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group small {
+            display: block;
+            color: #6b7280;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .accounts-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .account-platform {
+            padding: 5px 10px;
+            background: #1d9bf0;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box p {
+            color: #1e40af;
+            line-height: 1.6;
+        }
+        
+        .save-btn-container {
+            text-align: center;
+            padding-top: 20px;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Configuration</h1>
+            <a href="/" class="btn btn-back">← Retour</a>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            ✓ Configuration sauvegardée avec succès !
+        </div>
+        
+        <div class="card">
+            <h2>🐦 Comptes Twitter Connectés</h2>
+            <div class="info-box">
+                <p>Les posts seront publiés sur ces comptes connectés via Post Bridge.</p>
+            </div>
+            <ul class="accounts-list">
+                {% for account in twitter_accounts %}
+                <li class="account-item">
+                    <span class="account-platform">{{ account.platform|upper }}</span>
+                    <strong>@{{ account.username }}</strong>
+                    <span style="color: #6b7280;">(ID: {{ account.id }})</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>📅 Template de Publication Journalier</h2>
+            
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label>
+                        Activation de l'automatisation
+                    </label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="enabled" {% if config.enabled == 'true' %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
+                    <small>Activer ou désactiver la publication automatique</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="daily_posts_count">Nombre de posts par jour</label>
+                    <input type="number" id="daily_posts_count" min="1" max="50" value="{{ config.daily_posts_count }}">
+                    <small>Combien de tweets publier chaque jour</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="min_delay_minutes">Délai minimum (minutes)</label>
+                        <input type="number" id="min_delay_minutes" min="5" max="720" value="{{ config.min_delay_minutes }}">
+                        <small>Temps minimum entre deux posts</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="max_delay_minutes">Délai maximum (minutes)</label>
+                        <input type="number" id="max_delay_minutes" min="10" max="1440" value="{{ config.max_delay_minutes }}">
+                        <small>Temps maximum entre deux posts</small>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_hour">Heure de début</label>
+                        <input type="number" id="start_hour" min="0" max="23" value="{{ config.start_hour }}">
+                        <small>Heure à partir de laquelle publier (0-23)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_hour">Heure de fin</label>
+                        <input type="number" id="end_hour" min="0" max="23" value="{{ config.end_hour }}">
+                        <small>Heure jusqu'à laquelle publier (0-23)</small>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p>
+                        <strong>Comment ça marche :</strong><br>
+                        • Les posts seront planifiés automatiquement dans la plage horaire définie<br>
+                        • Le délai entre chaque post sera aléatoire (entre min et max)<br>
+                        • Les posts avec le plus de likes/vues seront priorisés<br>
+                        • La file d'attente sera actualisée automatiquement
+                    </p>
+                </div>
+                
+                <div class="save-btn-container">
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                        💾 Sauvegarder et Planifier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function saveSettings() {
+            const settings = {
+                enabled: document.getElementById('enabled').checked ? 'true' : 'false',
+                daily_posts_count: document.getElementById('daily_posts_count').value,
+                min_delay_minutes: document.getElementById('min_delay_minutes').value,
+                max_delay_minutes: document.getElementById('max_delay_minutes').value,
+                start_hour: document.getElementById('start_hour').value,
+                end_hour: document.getElementById('end_hour').value
+            };
+            
+            fetch('/api/update_settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(settings)
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      document.getElementById('successMessage').style.display = 'block';
+                      
+                      // Planifier maintenant
+                      if (settings.enabled === 'true') {
+                          fetch('/api/schedule_now', {method: 'POST'})
+                              .then(() => {
+                                  setTimeout(() => {
+                                      window.location.href = '/';
+                                  }, 2000);
+                              });
+                      } else {
+                          setTimeout(() => {
+                              window.location.href = '/';
+                          }, 2000);
+                      }
+                  }
+              });
+        }
+    </script>
+</body>
+</html>
+

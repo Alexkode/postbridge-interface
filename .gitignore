@@ -1,0 +1,46 @@
+# Environnement
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv_postbridge/
+env/
+ENV/
+*.egg-info/
+
+# Base de données (données personnelles)
+*.db
+*.sqlite
+*.sqlite3
+postbridge_app.db
+
+# Configuration avec secrets/tokens
+postbridge_config.json
+post-bridge-api.json
+
+# Logs
+*.log
+nohup.out
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Médias téléchargés/uploads
+uploads/
+media/
+static/uploads/
+
+# Tests et temporaires
+test_*.db
+*.tmp
+*.bak
