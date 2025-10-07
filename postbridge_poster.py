@@ -118,24 +118,48 @@ class PostBridgePoster:
             print(f"   ❌ Erreur upload: {upload_response.status_code}")
             return None
     
-    def parse_media_paths(self, media_string: str) -> List[str]:
-        """Parse une chaîne de médias (format liste Python) en liste de chemins."""
+    def parse_media_paths(self, media_string: str, project_root: Optional[Path] = None) -> List[str]:
+        """Parse une chaîne de médias et retourne les chemins absolus.
+        
+        Format: "software_clean/scraped data/.../filename.jpg" (chemin complet)
+        """
         if not media_string or media_string == '[]':
             return []
         
-        try:
-            # Essayer de parser comme une liste Python
-            media_list = ast.literal_eval(media_string)
-            if isinstance(media_list, list):
-                paths = []
-                for item in media_list:
-                    if isinstance(item, dict) and 'downloaded_filepath' in item:
-                        paths.append(item['downloaded_filepath'])
-                    elif isinstance(item, str):
-                        paths.append(item)
-                return paths
-        except:
-            pass
+        media_string = media_string.strip()
+        
+        # Format: chemin complet depuis software_clean
+        if media_string.startswith('software_clean/'):
+            if project_root is None:
+                # Déduire project_root depuis scraped_data_path
+                # scraped_data_path = .../scraper/software_clean/scraped data/twitter scraped data/accounts
+                # donc .parent x4 = .../scraper
+                scraped_path = Path(self.config['scraped_data_path'])
+                project_root = scraped_path.parent.parent.parent.parent
+            
+            absolute_path = project_root / media_string
+            
+            # Vérifier si existe tel quel
+            if absolute_path.exists():
+                return [str(absolute_path)]
+            
+            # Essayer avec extensions
+            base_name = absolute_path.name
+            parent_dir = absolute_path.parent
+            
+            if parent_dir.exists():
+                for ext in ['', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi']:
+                    potential_file = parent_dir / (base_name + ext)
+                    if potential_file.exists():
+                        return [str(potential_file)]
+                
+                # Recherche par préfixe
+                try:
+                    for file in parent_dir.iterdir():
+                        if file.name.startswith(base_name) and file.is_file():
+                            return [str(file)]
+                except:
+                    pass
         
         return []
     

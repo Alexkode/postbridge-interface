@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parcourir @{{ account_name }}</title>
+    <title>@{{ account_name }} - Post Bridge</title>
     <style>
         * {
             margin: 0;
@@ -12,224 +12,297 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #15202b;
+            color: #ffffff;
         }
         
         .header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            background: #192734;
+            border-bottom: 1px solid #38444d;
+            padding: 12px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .header h1 {
-            color: #667eea;
-            font-size: 2em;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 6px 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 20px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
+            font-size: 13px;
+            transition: all 0.2s;
         }
         
         .btn-back {
-            background: #64748b;
+            background: #1d9bf0;
             color: white;
         }
         
         .btn-back:hover {
-            background: #475569;
+            background: #1a8cd8;
+        }
+        
+        .btn-select-all {
+            background: #00ba7c;
+            color: white;
+        }
+        
+        .btn-select-all:hover {
+            background: #00a368;
         }
         
         .filters {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            background: #192734;
+            border-bottom: 1px solid #38444d;
+            padding: 12px 20px;
+            position: sticky;
+            top: 52px;
+            z-index: 99;
         }
         
-        .filter-group {
+        .filters-content {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 10px;
             flex-wrap: wrap;
         }
         
-        .filter-group label {
-            font-weight: 600;
-            color: #666;
-        }
-        
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1em;
+        .filters-content select,
+        .filters-content input {
+            background: #253341;
+            border: 1px solid #38444d;
+            border-radius: 4px;
+            padding: 6px 12px;
+            color: #ffffff;
+            font-size: 13px;
         }
         
         .tweets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
+            columns: 300px;
+            column-gap: 1px;
+            background: #38444d;
         }
         
-        .tweet-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            border: 2px solid transparent;
-            font-size: 0.9em;
+        .tweet {
+            background: #192734;
+            padding: 12px;
+            transition: background 0.2s;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 1px;
+            break-inside: avoid;
         }
         
-        .tweet-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        .tweet:hover {
+            background: #1c2938;
         }
         
-        .tweet-card.selected {
-            border-color: #10b981;
-            background: #f0fdf4;
+        .tweet.selected {
+            background: #1a3a2a;
+            border-left: 3px solid #00ba7c;
         }
         
         .tweet-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         
-        .tweet-type {
-            font-size: 0.8em;
-            padding: 5px 10px;
-            border-radius: 5px;
+        .tweet-meta {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 11px;
+            color: #8b98a5;
+        }
+        
+        .tweet-type-badge {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
             font-weight: 600;
         }
         
-        .type-original {
-            background: #dbeafe;
-            color: #1e40af;
+        .type-original { background: #1d9bf0; color: white; }
+        .type-retweet { background: #f91880; color: white; }
+        .type-quote { background: #7856ff; color: white; }
+        .type-reply { background: #ffad1f; color: white; }
+        
+        .tweet-actions-top {
+            display: flex;
+            gap: 4px;
         }
         
-        .type-retweet {
-            background: #fed7aa;
-            color: #9a3412;
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #8b98a5;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .type-quote {
-            background: #e0e7ff;
-            color: #4338ca;
+        .icon-btn:hover {
+            background: rgba(29, 155, 240, 0.1);
+            color: #1d9bf0;
         }
         
-        .type-reply {
-            background: #fce7f3;
-            color: #9f1239;
+        .icon-btn.delete:hover {
+            background: rgba(249, 24, 128, 0.1);
+            color: #f91880;
         }
+        
+        .icon-btn.select:hover {
+            background: rgba(0, 186, 124, 0.1);
+            color: #00ba7c;
+        }
+        
+        .icon-btn.selected {
+            color: #00ba7c;
+            background: rgba(0, 186, 124, 0.1);
+        }
+        
+        .tweet-text {
+            color: #ffffff;
+            line-height: 1.4;
+            font-size: 14px;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            cursor: text;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .tweet-text:hover {
+            background: rgba(29, 155, 240, 0.05);
+        }
+        
+        .tweet-text-edit {
+            width: 100%;
+            background: #253341;
+            border: 2px solid #1d9bf0;
+            border-radius: 8px;
+            padding: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+            line-height: 1.4;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .tweet-media {
+            margin-bottom: 8px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .tweet-media img {
+            width: 100%;
+            height: auto;
+            display: block;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+        
+        .media-grid {
+            display: grid;
+            gap: 2px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .media-grid.count-1 { grid-template-columns: 1fr; }
+        .media-grid.count-2 { grid-template-columns: repeat(2, 1fr); }
+        .media-grid.count-3 { grid-template-columns: repeat(2, 1fr); }
+        .media-grid.count-4 { grid-template-columns: repeat(2, 1fr); }
+        
+        .media-grid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .media-grid.count-1 img { height: auto; max-height: 400px; }
+        .media-grid.count-2 img,
+        .media-grid.count-3 img,
+        .media-grid.count-4 img { height: 150px; }
         
         .tweet-stats {
             display: flex;
             gap: 12px;
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 12px;
+            font-size: 12px;
+            color: #8b98a5;
         }
         
-        .stat-item {
+        .stat {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
         
-        .tweet-text {
-            color: #333;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            max-height: 90px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.95em;
-        }
-        
-        .tweet-media {
+        .edit-actions {
             display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
         }
         
-        .media-badge {
-            background: #667eea;
+        .btn-save {
+            background: #1d9bf0;
             color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-size: 0.75em;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .tweet-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-select {
-            flex: 1;
-            padding: 10px;
+            padding: 6px 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 20px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9em;
+            font-size: 13px;
         }
         
-        .btn-select:not(.selected) {
-            background: #667eea;
+        .btn-save:hover {
+            background: #1a8cd8;
+        }
+        
+        .btn-cancel {
+            background: #536471;
             color: white;
+            padding: 6px 16px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
         }
         
-        .btn-select:not(.selected):hover {
-            background: #5568d3;
+        .btn-cancel:hover {
+            background: #3f4b55;
         }
         
-        .btn-select.selected {
-            background: #10b981;
-            color: white;
-        }
-        
-        .tweet-date {
-            font-size: 0.85em;
-            color: #999;
-            margin-bottom: 10px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        /* Lightbox pour visualiser les images */
         .lightbox {
             display: none;
             position: fixed;
@@ -249,9 +322,8 @@
         
         .lightbox-content {
             max-width: 90%;
-            max-height: 90vh;
+            max-height: 90%;
             object-fit: contain;
-            border-radius: 8px;
         }
         
         .lightbox-close {
@@ -263,19 +335,6 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 10001;
-            background: rgba(0, 0, 0, 0.5);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        
-        .lightbox-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
         }
         
         .lightbox-nav {
@@ -283,172 +342,343 @@
             top: 50%;
             transform: translateY(-50%);
             color: white;
-            font-size: 50px;
+            font-size: 60px;
             font-weight: bold;
             cursor: pointer;
-            background: rgba(0, 0, 0, 0.5);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
+            padding: 0 20px;
             user-select: none;
+            z-index: 10001;
         }
         
-        .lightbox-nav:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-50%) scale(1.1);
-        }
-        
-        .lightbox-prev {
-            left: 40px;
-        }
-        
-        .lightbox-next {
-            right: 40px;
-        }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
         
         .lightbox-counter {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
+            font-size: 16px;
             background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 20px;
-            font-weight: 600;
+            z-index: 10001;
+        }
+        
+        .no-tweets {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b98a5;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📱 @{{ account_name }}</h1>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn" style="background: #10b981; color: white;" onclick="selectAllAccount()">
-                    ✓ Sélectionner tout le compte
-                </button>
-                <a href="/" class="btn btn-back">← Retour</a>
-            </div>
+    <div class="header">
+        <h1>@{{ account_name }}</h1>
+        <div class="header-actions">
+            <button class="btn btn-select-all" onclick="selectAllAccount()">✓ Tout</button>
+            <a href="/" class="btn btn-back">← Retour</a>
         </div>
-        
-        <div class="filters">
-            <div class="filter-group">
-                <label>Filtrer:</label>
-                <select id="typeFilter" onchange="filterTweets()">
-                    <option value="all">Tous les types</option>
-                    <option value="Original">Original uniquement</option>
-                    <option value="Retweet">Retweets</option>
-                    <option value="Quote">Citations</option>
-                    <option value="Reply">Réponses</option>
-                </select>
-                
-                <select id="mediaFilter" onchange="filterTweets()">
-                    <option value="all">Avec ou sans média</option>
-                    <option value="with">Avec média uniquement</option>
-                    <option value="without">Sans média</option>
-                </select>
-                
-                <label>Min likes:</label>
-                <input type="number" id="minLikes" value="0" onchange="filterTweets()" style="width: 100px;">
-                
-                <label>Recherche:</label>
-                <input type="text" id="searchText" placeholder="Rechercher..." onkeyup="filterTweets()">
-            </div>
+    </div>
+    
+    <div class="filters">
+        <div class="filters-content">
+            <select id="filterType" onchange="filterTweets()">
+                <option value="all">Tous</option>
+                <option value="Original" selected>Original</option>
+                <option value="Retweet">Retweets</option>
+                <option value="Quote">Citations</option>
+                <option value="Reply">Réponses</option>
+            </select>
+            
+            <select id="filterMedia" onchange="filterTweets()">
+                <option value="all">Tous</option>
+                <option value="true">Avec média</option>
+                <option value="false">Sans média</option>
+            </select>
+            
+            <input type="number" id="filterLikes" placeholder="Likes min" min="0" onchange="filterTweets()">
+            <input type="text" id="filterText" placeholder="Rechercher..." oninput="filterTweets()">
         </div>
-        
-        <div class="tweets-grid" id="tweetsGrid">
+    </div>
+    
+    <div class="tweets-grid" id="tweetsContainer">
+        {% if tweets %}
             {% for tweet in tweets %}
-            <div class="tweet-card {% if tweet.is_selected %}selected{% endif %}" 
+            <div class="tweet {% if tweet.is_selected %}selected{% endif %}" 
+                 data-tweet-id="{{ tweet.tweet_id }}"
                  data-type="{{ tweet.tweet_type }}"
                  data-has-media="{{ tweet.has_media|lower }}"
                  data-likes="{{ tweet.likes_count }}"
                  data-text="{{ tweet.tweet_text|lower }}">
+                
                 <div class="tweet-header">
-                    <span class="tweet-type type-{{ tweet.tweet_type|lower }}">
-                        {{ tweet.tweet_type }}
-                    </span>
-                </div>
-                
-                <div class="tweet-date">{{ tweet.tweet_date }}</div>
-                
-                <div class="tweet-stats">
-                    <div class="stat-item">
-                        <span>👁️</span>
-                        <span>{{ tweet.views_count }}</span>
+                    <div class="tweet-meta">
+                        <a href="{{ tweet.tweet_link }}" target="_blank" class="tweet-type-badge type-{{ tweet.tweet_type|lower }}" style="text-decoration: none; cursor: pointer;">
+                            {{ tweet.tweet_type }}
+                        </a>
+                        <span>{{ tweet.tweet_date[:10] }}</span>
                     </div>
-                    <div class="stat-item">
-                        <span>❤️</span>
-                        <span>{{ tweet.likes_count }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>🔄</span>
-                        <span>{{ tweet.retweets_count }}</span>
+                    <div class="tweet-actions-top">
+                        <button class="icon-btn select {% if tweet.is_selected %}selected{% endif %}" 
+                                onclick="toggleSelect('{{ account_name }}', '{{ tweet.tweet_id }}', this)"
+                                title="Sélectionner">
+                            {% if tweet.is_selected %}✓{% else %}+{% endif %}
+                        </button>
+                        <button class="icon-btn delete" 
+                                onclick="deleteTweet('{{ account_name }}', '{{ tweet.tweet_id }}')"
+                                title="Supprimer">
+                            ✕
+                        </button>
                     </div>
                 </div>
                 
-                <div class="tweet-text">{{ tweet.tweet_text }}</div>
+                <div class="tweet-text" 
+                     id="text-{{ tweet.tweet_id }}"
+                     onclick="editTweet('{{ tweet.tweet_id }}')"
+                     title="Cliquer pour modifier">{{ tweet.tweet_text }}</div>
+                <textarea class="tweet-text-edit" 
+                          id="edit-{{ tweet.tweet_id }}" 
+                          style="display: none;">{{ tweet.tweet_text }}</textarea>
                 
-                {% if tweet.has_media %}
-                <div class="tweet-media" style="margin-bottom: 10px;">
-                    <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;" class="media-gallery" data-tweet-id="{{ tweet.tweet_id }}">
-                        {% for media_path in tweet.media_paths %}
+                <div class="edit-actions" id="actions-{{ tweet.tweet_id }}" style="display: none;">
+                    <button class="btn-save" onclick="saveTweet('{{ tweet.tweet_id }}')">Sauvegarder</button>
+                    <button class="btn-cancel" onclick="cancelEdit('{{ tweet.tweet_id }}')">Annuler</button>
+                </div>
+                
+                {% if tweet.has_media and tweet.media_paths %}
+                <div class="tweet-media">
+                    <div class="media-grid count-{{ [tweet.media_paths|length, 4]|min }}">
+                        {% for media_path in tweet.media_paths[:4] %}
                             {% if media_path.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')) %}
-                                <img src="/media/{{ media_path | urlencode }}" 
-                                     alt="Tweet media" 
-                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; {% if loop.index > 2 %}display: none;{% endif %}"
-                                     class="tweet-thumbnail"
-                                     data-full-src="/media/{{ media_path | urlencode }}"
-                                     onclick="openLightbox(this)"
-                                     onerror="this.style.display='none'">
+                                {% set path_only = media_path.split('software_clean/')[-1] %}
+                                <img src="/media/software_clean/{{ path_only }}" 
+                                     alt="Media" 
+                                     onclick="openLightbox('{{ tweet.tweet_id }}', {{ loop.index0 }})"
+                                     onerror="console.error('Image error:', this.src); this.parentElement.style.display='none'">
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <span class="media-badge" style="font-size: 0.8em; padding: 3px 8px; cursor: pointer;" 
-                          onclick="openLightbox(this.parentElement.querySelector('.tweet-thumbnail'))">
-                        📷 {{ tweet.media_count }}
-                    </span>
                 </div>
                 {% endif %}
                 
-                <div class="tweet-actions">
-                    <button class="btn-select {% if tweet.is_selected %}selected{% endif %}" 
-                            onclick='toggleSelect(this, "{{ account_name }}", "{{ tweet.tweet_id }}", {{ tweet|tojson|safe }})'>
-                        <span class="select-text">{% if tweet.is_selected %}✓{% else %}+{% endif %}</span>
-                    </button>
+                <div class="tweet-stats">
+                    <div class="stat"><span>👁</span> <span>{{ tweet.views_count|default(0) }}</span></div>
+                    <div class="stat"><span>❤️</span> <span>{{ tweet.likes_count|default(0) }}</span></div>
+                    <div class="stat"><span>🔄</span> <span>{{ tweet.retweets_count|default(0) }}</span></div>
+                    <div class="stat"><span>💬</span> <span>{{ tweet.replies_count|default(0) }}</span></div>
                 </div>
             </div>
             {% endfor %}
-        </div>
+        {% else %}
+            <div class="no-tweets">
+                <h2>Aucun tweet trouvé</h2>
+            </div>
+        {% endif %}
     </div>
     
-    <!-- Lightbox pour visualiser les images -->
     <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
         <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
         <span class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1, event)">‹</span>
-        <img id="lightbox-img" class="lightbox-content" src="" alt="Image en grand">
+        <img id="lightbox-img" class="lightbox-content" src="" alt="Image">
         <span class="lightbox-nav lightbox-next" onclick="navigateLightbox(1, event)">›</span>
         <div class="lightbox-counter" id="lightbox-counter">1 / 1</div>
     </div>
     
     <script>
+        console.log('🚀 Script chargé - version 2.0');
         let currentImages = [];
         let currentImageIndex = 0;
+        let originalTexts = {};
         
-        function openLightbox(imgElement) {
-            if (!imgElement) return;
+        function toggleSelect(accountName, tweetId, button) {
+            const tweet = button.closest('.tweet');
+            const isSelected = tweet.classList.contains('selected');
             
-            // Récupérer toutes les images de ce tweet
-            const gallery = imgElement.closest('.media-gallery');
-            const allImages = Array.from(gallery.querySelectorAll('.tweet-thumbnail'))
-                .filter(img => img.style.display !== 'none')
-                .map(img => img.dataset.fullSrc);
+            fetch('/api/select_post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    account_name: accountName,
+                    tweet_id: tweetId,
+                    action: isSelected ? 'deselect' : 'select'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    tweet.classList.toggle('selected');
+                    button.classList.toggle('selected');
+                    button.textContent = isSelected ? '+' : '✓';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        async function selectAllAccount() {
+            const tweets = document.querySelectorAll('.tweet[style*="display: block"], .tweet:not([style*="display: none"])');
+            let count = 0;
             
-            currentImages = allImages;
-            currentImageIndex = allImages.indexOf(imgElement.dataset.fullSrc);
+            for (const tweet of tweets) {
+                if (tweet.classList.contains('selected')) continue;
+                
+                const tweetId = tweet.dataset.tweetId;
+                const button = tweet.querySelector('.icon-btn.select');
+                
+                try {
+                    const response = await fetch('/api/select_post', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            account_name: '{{ account_name }}',
+                            tweet_id: tweetId,
+                            action: 'select'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        tweet.classList.add('selected');
+                        button.classList.add('selected');
+                        button.textContent = '✓';
+                        count++;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+            
+            alert(`${count} tweets sélectionnés !`);
+        }
+        
+        function editTweet(tweetId) {
+            const textDiv = document.getElementById(`text-${tweetId}`);
+            const textarea = document.getElementById(`edit-${tweetId}`);
+            const actions = document.getElementById(`actions-${tweetId}`);
+            
+            if (!originalTexts[tweetId]) {
+                originalTexts[tweetId] = textDiv.textContent;
+            }
+            
+            // Ajuster la hauteur du textarea au contenu
+            textarea.style.height = 'auto';
+            textarea.style.minHeight = Math.max(textDiv.offsetHeight, 100) + 'px';
+            
+            textDiv.style.display = 'none';
+            textarea.style.display = 'block';
+            actions.style.display = 'flex';
+            textarea.focus();
+            
+            // Ajuster automatiquement la hauteur pendant la saisie
+            textarea.oninput = function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            };
+        }
+        
+        function cancelEdit(tweetId) {
+            const textDiv = document.getElementById(`text-${tweetId}`);
+            const textarea = document.getElementById(`edit-${tweetId}`);
+            const actions = document.getElementById(`actions-${tweetId}`);
+            
+            textarea.value = originalTexts[tweetId] || textDiv.textContent;
+            textDiv.style.display = 'block';
+            textarea.style.display = 'none';
+            actions.style.display = 'none';
+        }
+        
+        function saveTweet(tweetId) {
+            const textarea = document.getElementById(`edit-${tweetId}`);
+            const textDiv = document.getElementById(`text-${tweetId}`);
+            const newText = textarea.value;
+            const originalText = originalTexts[tweetId] || textDiv.textContent;
+            
+            fetch('/api/update_tweet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    account_name: '{{ account_name }}',
+                    tweet_id: tweetId,
+                    new_text: newText,
+                    original_text: originalText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    textDiv.textContent = newText;
+                    originalTexts[tweetId] = newText;
+                    cancelEdit(tweetId);
+                } else {
+                    alert('Erreur lors de la sauvegarde');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la sauvegarde');
+            });
+        }
+        
+        function deleteTweet(accountName, tweetId) {
+            if (!confirm('Supprimer ce tweet ?')) return;
+            
+            fetch('/api/delete_tweet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    account_name: accountName,
+                    tweet_id: tweetId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tweet = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+                    tweet.style.opacity = '0';
+                    tweet.style.transform = 'scale(0.9)';
+                    setTimeout(() => tweet.remove(), 300);
+                } else {
+                    alert('Erreur lors de la suppression');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erreur lors de la suppression');
+            });
+        }
+        
+        function filterTweets() {
+            const filterType = document.getElementById('filterType').value;
+            const filterMedia = document.getElementById('filterMedia').value;
+            const filterLikes = parseInt(document.getElementById('filterLikes').value) || 0;
+            const filterText = document.getElementById('filterText').value.toLowerCase();
+            
+            const tweets = document.querySelectorAll('.tweet');
+            
+            tweets.forEach(tweet => {
+                const type = tweet.dataset.type;
+                const hasMedia = tweet.dataset.hasMedia;
+                const likes = parseInt(tweet.dataset.likes) || 0;
+                const text = tweet.dataset.text;
+                
+                let show = true;
+                
+                if (filterType !== 'all' && type !== filterType) show = false;
+                if (filterMedia !== 'all' && hasMedia !== filterMedia) show = false;
+                if (likes < filterLikes) show = false;
+                if (filterText && !text.includes(filterText)) show = false;
+                
+                tweet.style.display = show ? 'flex' : 'none';
+            });
+        }
+        
+        function openLightbox(tweetId, imageIndex) {
+            const tweet = document.querySelector(`[data-tweet-id="${tweetId}"]`);
+            const images = Array.from(tweet.querySelectorAll('.media-grid img')).map(img => img.src);
+            
+            currentImages = images;
+            currentImageIndex = imageIndex;
             
             showLightboxImage();
             document.getElementById('lightbox').classList.add('active');
@@ -456,24 +686,15 @@
         }
         
         function closeLightbox(event) {
-            if (event.target === event.currentTarget) {
+            if (event.target === event.currentTarget || event.target.classList.contains('lightbox-close')) {
                 document.getElementById('lightbox').classList.remove('active');
                 document.body.style.overflow = 'auto';
-                currentImages = [];
-                currentImageIndex = 0;
             }
         }
         
         function navigateLightbox(direction, event) {
             event.stopPropagation();
-            currentImageIndex += direction;
-            
-            if (currentImageIndex < 0) {
-                currentImageIndex = currentImages.length - 1;
-            } else if (currentImageIndex >= currentImages.length) {
-                currentImageIndex = 0;
-            }
-            
+            currentImageIndex = (currentImageIndex + direction + currentImages.length) % currentImages.length;
             showLightboxImage();
         }
         
@@ -483,153 +704,17 @@
             
             img.src = currentImages[currentImageIndex];
             counter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
-            
-            // Afficher/masquer les flèches selon le nombre d'images
-            document.querySelector('.lightbox-prev').style.display = currentImages.length > 1 ? 'flex' : 'none';
-            document.querySelector('.lightbox-next').style.display = currentImages.length > 1 ? 'flex' : 'none';
         }
         
-        // Navigation clavier
-        document.addEventListener('keydown', function(e) {
-            const lightbox = document.getElementById('lightbox');
-            if (lightbox.classList.contains('active')) {
-                if (e.key === 'Escape') {
-                    lightbox.classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                } else if (e.key === 'ArrowLeft') {
-                    navigateLightbox(-1, e);
-                } else if (e.key === 'ArrowRight') {
-                    navigateLightbox(1, e);
-                }
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('lightbox').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') navigateLightbox(-1, e);
+                if (e.key === 'ArrowRight') navigateLightbox(1, e);
+                if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox'), currentTarget: document.getElementById('lightbox') });
             }
         });
-    </script>
-    
-    <script>
-        function toggleSelect(btn, accountName, tweetId, tweetData) {
-            const isSelected = btn.classList.contains('selected');
-            const card = btn.closest('.tweet-card');
-            
-            if (isSelected) {
-                // Désélectionner
-                fetch('/api/deselect_post', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        account_name: accountName,
-                        tweet_id: tweetId
-                    })
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.success) {
-                          btn.classList.remove('selected');
-                          card.classList.remove('selected');
-                          btn.querySelector('.select-text').textContent = 'Sélectionner';
-                      } else {
-                          console.error('Erreur:', data);
-                          alert('Erreur lors de la désélection: ' + (data.error || 'Erreur inconnue'));
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Erreur réseau:', error);
-                      alert('Erreur de connexion au serveur');
-                  });
-            } else {
-                // Sélectionner
-                fetch('/api/select_post', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        account_name: accountName,
-                        tweet_id: tweetId,
-                        tweet_text: tweetData.tweet_text,
-                        tweet_date: tweetData.tweet_date,
-                        has_media: tweetData.has_media,
-                        media_paths: tweetData.media_paths,
-                        views_count: tweetData.views_count,
-                        likes_count: tweetData.likes_count,
-                        retweets_count: tweetData.retweets_count
-                    })
-                }).then(response => response.json())
-                  .then(data => {
-                      if (data.success) {
-                          btn.classList.add('selected');
-                          card.classList.add('selected');
-                          btn.querySelector('.select-text').textContent = '✓ Sélectionné';
-                      } else {
-                          console.error('Erreur:', data);
-                          alert('Erreur lors de la sélection: ' + (data.error || 'Erreur inconnue'));
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Erreur réseau:', error);
-                      alert('Erreur de connexion au serveur');
-                  });
-            }
-        }
         
-        function selectAllAccount() {
-            if (!confirm('Voulez-vous sélectionner TOUS les tweets de ce compte et les programmer automatiquement selon votre configuration ?')) {
-                return;
-            }
-            
-            const cards = document.querySelectorAll('.tweet-card:not(.selected)');
-            let selectedCount = 0;
-            
-            // Afficher un message de progression
-            const progressDiv = document.createElement('div');
-            progressDiv.style = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; text-align: center;';
-            progressDiv.innerHTML = '<h3>🔄 Sélection en cours...</h3><p id="progress-text">0 / ' + cards.length + ' tweets sélectionnés</p>';
-            document.body.appendChild(progressDiv);
-            
-            // Sélectionner tous les tweets visibles un par un
-            let processed = 0;
-            cards.forEach((card, index) => {
-                const btn = card.querySelector('.btn-select');
-                if (btn) {
-                    setTimeout(() => {
-                        btn.click();
-                        processed++;
-                        document.getElementById('progress-text').textContent = processed + ' / ' + cards.length + ' tweets sélectionnés';
-                        
-                        if (processed === cards.length) {
-                            setTimeout(() => {
-                                document.body.removeChild(progressDiv);
-                                alert('✅ ' + processed + ' tweets sélectionnés avec succès !\n\nAllez dans Configuration pour activer l\'automatisation.');
-                                window.location.href = '/queue';
-                            }, 500);
-                        }
-                    }, index * 100); // 100ms entre chaque sélection pour éviter de surcharger
-                }
-            });
-        }
-        
-        function filterTweets() {
-            const typeFilter = document.getElementById('typeFilter').value;
-            const mediaFilter = document.getElementById('mediaFilter').value;
-            const minLikes = parseInt(document.getElementById('minLikes').value) || 0;
-            const searchText = document.getElementById('searchText').value.toLowerCase();
-            
-            const cards = document.querySelectorAll('.tweet-card');
-            
-            cards.forEach(card => {
-                const type = card.dataset.type;
-                const hasMedia = card.dataset.hasMedia === 'true';
-                const likes = parseInt(card.dataset.likes);
-                const text = card.dataset.text;
-                
-                let show = true;
-                
-                if (typeFilter !== 'all' && type !== typeFilter) show = false;
-                if (mediaFilter === 'with' && !hasMedia) show = false;
-                if (mediaFilter === 'without' && hasMedia) show = false;
-                if (likes < minLikes) show = false;
-                if (searchText && !text.includes(searchText)) show = false;
-                
-                card.style.display = show ? 'block' : 'none';
-            });
-        }
+        filterTweets();
     </script>
 </body>
 </html>
-

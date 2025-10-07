@@ -1,0 +1,186 @@
+╔═══════════════════════════════════════════════════════════════╗
+║         ✅ SAUVEGARDE DES TWEETS FIXÉE ✅                      ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🔧 PROBLÈME RÉSOLU
+═══════════════════════════════════════════════════════════════
+
+Erreur:
+   "Erreur lors de la sauvegarde"
+   
+Cause:
+   L'endpoint essayait de mettre à jour `selected_posts`
+   mais le tweet n'était pas sélectionné
+
+Solution:
+   ✅ Nouvelle table `tweet_edits` pour toutes les modifications
+   ✅ Sauvegarde fonctionne même si tweet non sélectionné
+   ✅ Les modifications sont appliquées à l'affichage
+
+
+📊 NOUVELLE TABLE: tweet_edits
+═══════════════════════════════════════════════════════════════
+
+Structure:
+   • id (PRIMARY KEY)
+   • account_name
+   • tweet_id
+   • original_text (texte d'origine)
+   • edited_text (texte modifié)
+   • created_at
+   • updated_at
+   • UNIQUE(account_name, tweet_id)
+
+
+✨ FONCTIONNEMENT
+═══════════════════════════════════════════════════════════════
+
+1️⃣  ÉDITION
+
+    Clic sur ✎ → Mode édition
+    Modification du texte
+    Clic sur [Sauvegarder]
+    
+    → Sauvegardé dans `tweet_edits`
+    → Si sélectionné, mis à jour dans `selected_posts` aussi
+
+
+2️⃣  AFFICHAGE
+
+    Chargement des tweets depuis CSV
+    Chargement des modifications depuis `tweet_edits`
+    Fusion: texte modifié remplace texte original
+    
+    → Vous voyez le texte modifié ! ✅
+
+
+3️⃣  PUBLICATION
+
+    Lors de la publication sur Post Bridge
+    Le texte modifié de `selected_posts` est utilisé
+    
+    → Le tweet publié contient vos modifications ! ✅
+
+
+🎯 AVANTAGES
+═══════════════════════════════════════════════════════════════
+
+✅ Modifier n'importe quel tweet (sélectionné ou non)
+✅ Les modifications persistent entre les sessions
+✅ Les modifications s'appliquent automatiquement
+✅ Historique des modifications (original_text conservé)
+✅ Pas besoin de modifier le CSV original
+✅ Rétro-compatible avec les tweets déjà sélectionnés
+
+
+⚡ ACTIONS REQUISES
+═══════════════════════════════════════════════════════════════
+
+1️⃣  REDÉMARRER FLASK
+
+    Terminal → Ctrl + C
+    Terminal → python3 postbridge_app.py
+
+
+2️⃣  RECHARGER NAVIGATEUR
+
+    Ctrl + Shift + R
+
+
+3️⃣  TESTER
+
+    1. Cliquez sur ✎ sur un tweet
+    2. Modifiez le texte
+    3. Cliquez [Sauvegarder]
+    4. ✅ Plus d'erreur !
+    5. Rechargez la page
+    6. ✅ Le texte modifié est conservé !
+
+
+💾 BASE DE DONNÉES
+═══════════════════════════════════════════════════════════════
+
+Fichier: postbridge.db
+
+Tables:
+   • selected_posts  → Tweets sélectionnés
+   • tweet_edits     → Modifications de texte (NEW!)
+   • config          → Configuration
+
+
+📝 EXEMPLE D'UTILISATION
+═══════════════════════════════════════════════════════════════
+
+Avant:
+   Tweet: "Dear son, original text..."
+   Clic ✎ → Modifier → [Sauvegarder]
+   ❌ Erreur!
+
+Après:
+   Tweet: "Dear son, original text..."
+   Clic ✎ → Modifier → "Dear son, new text..."
+   Clic [Sauvegarder]
+   ✅ Sauvegardé !
+   
+   Rechargement de la page:
+   Tweet: "Dear son, new text..."  ← Modifié !
+
+
+🔄 WORKFLOW COMPLET
+═══════════════════════════════════════════════════════════════
+
+1. Parcourir les tweets d'un compte
+
+2. Modifier ceux que vous voulez:
+   Clic ✎ → Éditer → [Sauvegarder]
+
+3. Sélectionner les tweets à publier:
+   Clic + sur chaque tweet
+
+4. Ou tout sélectionner:
+   Clic [✓ Tout]
+
+5. Aller dans Configuration
+   Activer la programmation
+   Configurer le template
+
+6. Les tweets modifiés seront publiés ! 🎉
+
+
+💡 ASTUCES
+═══════════════════════════════════════════════════════════════
+
+• Modifiez avant ou après sélection, peu importe
+• Les modifications sont sauvegardées immédiatement
+• Rechargez la page pour voir les modifications
+• Le texte original est conservé (original_text)
+• Vous pouvez toujours revenir à l'original si besoin
+
+
+🐛 SI ÇA NE MARCHE TOUJOURS PAS
+═══════════════════════════════════════════════════════════════
+
+1. Vérifiez le terminal Flask pour les erreurs
+2. Ouvrez la console du navigateur (F12)
+3. Regardez les erreurs JavaScript
+4. Vérifiez que la table existe:
+   
+   sqlite3 postbridge.db "SELECT * FROM tweet_edits;"
+
+5. Si la table n'existe pas, supprimez la DB:
+   
+   rm postbridge.db
+   
+   Puis redémarrez Flask (créera une nouvelle DB)
+
+
+═══════════════════════════════════════════════════════════════
+          🚀 REDÉMARREZ FLASK MAINTENANT ! 🚀
+═══════════════════════════════════════════════════════════════
+
+   1. Terminal → Ctrl + C
+   2. Terminal → python3 postbridge_app.py
+   3. Navigateur → Ctrl + Shift + R
+   4. TESTER LA SAUVEGARDE ! 🎉
+
+═══════════════════════════════════════════════════════════════

@@ -57,6 +57,20 @@ def init_db():
         )
     ''')
     
+    # Table des modifications de tweets (même non sélectionnés)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS tweet_edits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_name TEXT NOT NULL,
+            tweet_id TEXT NOT NULL,
+            original_text TEXT,
+            edited_text TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(account_name, tweet_id)
+        )
+    ''')
+    
     # Table de configuration
     c.execute('''
         CREATE TABLE IF NOT EXISTS config (
@@ -108,6 +122,11 @@ def load_account_tweets(account_name):
     """Charge les tweets d'un compte depuis le CSV."""
     base_path = Path(poster.config['scraped_data_path']) / account_name
     
+    # Chemin racine du projet (parent de software_clean)
+    # scraped_data_path = .../scraper/software_clean/scraped data/twitter scraped data/accounts
+    # donc .parent x4 = .../scraper
+    project_root = Path(poster.config['scraped_data_path']).parent.parent.parent.parent
+    
     # Essayer structure directe
     csv_path_direct = base_path / 'Account Posts' / 'Account Posts.csv'
     media_base_dir = base_path / 'Account Posts'
@@ -142,22 +161,22 @@ def load_account_tweets(account_name):
             media_paths = []
             for media_str in [images_str, videos_str]:
                 if media_str and media_str.strip():
-                    # Format simple: "Account Posts Media/filename" ou "Account Posts Media/filename.jpg"
-                    if 'Account Posts Media/' in media_str:
-                        # Chemin relatif
-                        relative_path = media_str.strip()
-                        absolute_path = media_base_dir / relative_path
+                    media_str = media_str.strip()
+                    
+                    # Format: "software_clean/scraped data/.../filename.jpg"
+                    # Le CSV contient le chemin complet depuis software_clean
+                    if media_str.startswith('software_clean/'):
+                        # Construire le chemin absolu
+                        absolute_path = project_root / media_str
                         
-                        # Vérifier si le fichier existe tel quel
                         if absolute_path.exists():
                             media_paths.append(str(absolute_path))
                         else:
-                            # Si pas d'extension ou fichier non trouvé, chercher avec extensions
+                            # Essayer avec extensions si pas d'extension ou fichier non trouvé
                             base_name = absolute_path.name
                             parent_dir = absolute_path.parent
                             
                             if parent_dir.exists():
-                                # Chercher exactement ce nom de fichier avec différentes extensions
                                 found = False
                                 for ext in ['', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.avi']:
                                     potential_file = parent_dir / (base_name + ext)
@@ -166,7 +185,6 @@ def load_account_tweets(account_name):
                                         found = True
                                         break
                                 
-                                # Si toujours pas trouvé, chercher si le nom existe comme préfixe
                                 if not found:
                                     try:
                                         for file in parent_dir.iterdir():
@@ -175,20 +193,10 @@ def load_account_tweets(account_name):
                                                 break
                                     except:
                                         pass
-                    else:
-                        # Format avec liste/dict Python
-                        try:
-                            import ast
-                            media_list = ast.literal_eval(media_str)
-                            if isinstance(media_list, list):
-                                for item in media_list:
-                                    if isinstance(item, dict) and 'downloaded_filepath' in item:
-                                        media_paths.append(item['downloaded_filepath'])
-                        except:
-                            pass
             
             tweet = {
                 'tweet_id': row.get('Tweet ID', ''),
+                'tweet_link': row.get('Tweet Link', ''),
                 'tweet_text': row.get('Tweet Text', ''),
                 'tweet_date': row.get('Tweet Date and Time (UTC)', ''),
                 'tweet_type': row.get('Tweet Type (Original / Retweet / Quote / Reply)', ''),
@@ -387,15 +395,23 @@ def browse_account(account_name):
     """Parcourir les tweets d'un compte."""
     tweets = load_account_tweets(account_name)
     
-    # Vérifier quels tweets sont déjà sélectionnés
+    # Vérifier quels tweets sont déjà sélectionnés et charger les modifications
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('SELECT tweet_id FROM selected_posts WHERE account_name = ?', (account_name,))
     selected_ids = set(row[0] for row in c.fetchall())
+    
+    # Charger les modifications de texte
+    c.execute('SELECT tweet_id, edited_text FROM tweet_edits WHERE account_name = ?', (account_name,))
+    edits = {row[0]: row[1] for row in c.fetchall()}
     conn.close()
     
+    # Marquer les tweets sélectionnés et appliquer les modifications
     for tweet in tweets:
         tweet['is_selected'] = tweet['tweet_id'] in selected_ids
+        # Appliquer les modifications de texte si elles existent
+        if tweet['tweet_id'] in edits:
+            tweet['tweet_text'] = edits[tweet['tweet_id']]
     
     return render_template('postbridge_browse.html',
                          account_name=account_name,
@@ -406,29 +422,46 @@ def browse_account(account_name):
 def select_post():
     """Sélectionne un post pour publication."""
     data = request.json
+    account_name = data.get('account_name')
+    tweet_id = data.get('tweet_id')
+    action = data.get('action', 'select')
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     
     try:
-        c.execute('''
-            INSERT INTO selected_posts 
-            (account_name, tweet_id, tweet_text, tweet_date, has_media, media_paths, 
-             views_count, likes_count, retweets_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            data['account_name'],
-            data['tweet_id'],
-            data['tweet_text'],
-            data.get('tweet_date', ''),
-            data.get('has_media', False),
-            json.dumps(data.get('media_paths', [])),
-            data.get('views_count', 0),
-            data.get('likes_count', 0),
-            data.get('retweets_count', 0)
-        ))
-        conn.commit()
-        return jsonify({'success': True})
+        if action == 'deselect':
+            # Désélectionner
+            c.execute('DELETE FROM selected_posts WHERE account_name = ? AND tweet_id = ?',
+                     (account_name, tweet_id))
+            conn.commit()
+            return jsonify({'success': True})
+        else:
+            # Sélectionner - récupérer les données du tweet depuis le CSV
+            tweets = load_account_tweets(account_name)
+            tweet_data = next((t for t in tweets if t['tweet_id'] == tweet_id), None)
+            
+            if not tweet_data:
+                return jsonify({'success': False, 'error': 'Tweet non trouvé'})
+            
+            c.execute('''
+                INSERT INTO selected_posts 
+                (account_name, tweet_id, tweet_text, tweet_date, has_media, media_paths, 
+                 views_count, likes_count, retweets_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                account_name,
+                tweet_id,
+                tweet_data.get('tweet_text', ''),
+                tweet_data.get('tweet_date', ''),
+                tweet_data.get('has_media', False),
+                json.dumps(tweet_data.get('media_paths', [])),
+                tweet_data.get('views_count', 0),
+                tweet_data.get('likes_count', 0),
+                tweet_data.get('retweets_count', 0)
+            ))
+            conn.commit()
+            return jsonify({'success': True})
     except sqlite3.IntegrityError:
         return jsonify({'success': False, 'error': 'Post déjà sélectionné'})
     finally:
@@ -550,6 +583,63 @@ def post_now(post_id):
     return jsonify({'success': True})
 
 
+@app.route('/api/update_tweet', methods=['POST'])
+def update_tweet():
+    """Met à jour le texte d'un tweet."""
+    data = request.json
+    account_name = data.get('account_name')
+    tweet_id = data.get('tweet_id')
+    new_text = data.get('new_text')
+    original_text = data.get('original_text', '')
+    
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    try:
+        # 1. Sauvegarder dans tweet_edits (pour tous les tweets)
+        c.execute('''
+            INSERT INTO tweet_edits (account_name, tweet_id, original_text, edited_text)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(account_name, tweet_id) DO UPDATE SET
+                edited_text = excluded.edited_text
+        ''', (account_name, tweet_id, original_text, new_text))
+        
+        # 2. Si le tweet est dans selected_posts, mettre à jour là aussi
+        c.execute('''UPDATE selected_posts 
+                     SET tweet_text = ?
+                     WHERE account_name = ? AND tweet_id = ?''', 
+                  (new_text, account_name, tweet_id))
+        
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"❌ Erreur update_tweet: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/delete_tweet', methods=['POST'])
+def delete_tweet():
+    """Supprime un tweet de la sélection."""
+    data = request.json
+    account_name = data.get('account_name')
+    tweet_id = data.get('tweet_id')
+    
+    conn = sqlite3.connect('postbridge.db')
+    c = conn.cursor()
+    
+    # Supprimer le tweet de la base de données
+    c.execute('''DELETE FROM selected_posts 
+                 WHERE account_name = ? AND tweet_id = ?''', 
+              (account_name, tweet_id))
+    
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
 @app.route('/media/<path:filepath>')
 def serve_media(filepath):
     """Sert les fichiers médias."""
@@ -557,9 +647,18 @@ def serve_media(filepath):
         # Décoder le chemin et le servir
         import urllib.parse
         decoded_path = urllib.parse.unquote(filepath)
-        if os.path.exists(decoded_path):
-            return send_file(decoded_path)
+        
+        # Construire le chemin absolu depuis le workspace
+        # filepath commence par "software_clean/..."
+        workspace_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        absolute_path = os.path.join(workspace_root, decoded_path)
+        
+        print(f"🖼️  Tentative de chargement: {absolute_path}")
+        
+        if os.path.exists(absolute_path):
+            return send_file(absolute_path)
         else:
+            print(f"❌ Fichier non trouvé: {absolute_path}")
             return "File not found", 404
     except Exception as e:
         print(f"Erreur serving media: {e}")
