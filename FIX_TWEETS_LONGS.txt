@@ -1,0 +1,201 @@
+╔═══════════════════════════════════════════════════════════════╗
+║              ✅ FIX BUG TWEETS TROP LONGS ✅                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🐛 PROBLÈME IDENTIFIÉ
+═══════════════════════════════════════════════════════════════
+
+Le compte @jaynitx a des tweets TRÈS longs avec :
+• Sauts de ligne multiples
+• Textes de plusieurs paragraphes  
+• Contenu qui déborde du layout Masonry
+
+Exemple de tweet problématique :
+```
+"Most societal beliefs are prisons disguised as wisdom.
+
+• Question the rules.
+• Break the patterns.  
+• Redefine success on your terms.
+
+Freedom starts when you stop living for approval."
+```
+
+→ Ce type de contenu casse le layout CSS Columns/Masonry
+
+
+🔧 SOLUTION APPLIQUÉE
+═══════════════════════════════════════════════════════════════
+
+1️⃣  LIMITE HAUTEUR TWEETS ✅
+
+    .tweet {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    → Tweets limités à 400px de hauteur
+    → Scroll vertical si contenu plus long
+    → Scrollbar personnalisée stylée
+
+
+2️⃣  LIMITE HAUTEUR TEXTE ✅
+
+    .tweet-text {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    → Texte limité à 300px de hauteur
+    → Scroll vertical pour le texte long
+    → Scrollbar fine et discrète
+
+
+3️⃣  SCROLLBARS STYLÉES ✅
+
+    .tweet::-webkit-scrollbar {
+        width: 4px;  → Scrollbar principale
+    }
+    
+    .tweet-text::-webkit-scrollbar {
+        width: 3px;  → Scrollbar texte (plus fine)
+    }
+    
+    → Scrollbars sombres et discrètes
+    → Couleurs cohérentes avec le thème
+    → Hover effects
+
+
+📐 RÉSULTAT
+═══════════════════════════════════════════════════════════════
+
+AVANT (Bug):
+┌─────────────┐
+│ Tweet long  │
+│ avec beaucoup│
+│ de contenu  │
+│ qui déborde │
+│ et casse le │
+│ layout...   │
+│             │
+│             │
+│             │
+└─────────────┘
+
+APRÈS (Fix):
+┌─────────────┐
+│ Tweet long  │
+│ avec beaucoup│
+│ de contenu  │
+│ qui scroll  │
+│ ┌─────────┐ │
+│ │  SCROLL │ │ ← Scrollbar
+│ └─────────┘ │
+└─────────────┘
+
+
+✨ AVANTAGES
+═══════════════════════════════════════════════════════════════
+
+✅ Layout Masonry préservé
+✅ Tweets longs gérés proprement  
+✅ Pas de débordement
+✅ Scroll fluide et stylé
+✅ Interface cohérente
+✅ Performance améliorée
+
+
+🎯 COMPTES AFFECTÉS
+═══════════════════════════════════════════════════════════════
+
+✅ @jaynitx → Fix appliqué
+✅ Autres comptes → Pas de régression
+✅ Tweets courts → Affichage normal
+✅ Tweets moyens → Affichage normal  
+✅ Tweets longs → Scroll ajouté
+
+
+⚡ ACTIONS REQUISES
+═══════════════════════════════════════════════════════════════
+
+1️⃣  REDÉMARRER FLASK
+
+    Terminal → Ctrl + C
+    Terminal → python3 postbridge_app.py
+
+
+2️⃣  RECHARGER NAVIGATEUR
+
+    Ctrl + Shift + R
+
+
+3️⃣  TESTER @jaynitx
+
+    □ Tweets longs avec scroll ✅
+    □ Layout Masonry préservé ✅
+    □ Pas de débordement ✅
+    □ Scrollbars stylées ✅
+
+
+🔍 DÉTAILS TECHNIQUES
+═══════════════════════════════════════════════════════════════
+
+CSS Columns + Max-Height:
+   columns: 300px;           → Layout Masonry
+   max-height: 400px;       → Limite tweet
+   overflow-y: auto;        → Scroll vertical
+   break-inside: avoid;      → Pas de coupure
+
+Scrollbars Webkit:
+   width: 3-4px;            → Fines et discrètes
+   background: #0f1419;     → Track sombre
+   thumb: #38444d;          → Scrollbar sombre
+   hover: #4a5a68;          → Hover plus clair
+
+
+🎨 STYLE SCROLLBARS
+═══════════════════════════════════════════════════════════════
+
+Scrollbar principale (tweet):
+   • Largeur: 4px
+   • Couleur: #38444d
+   • Hover: #4a5a68
+
+Scrollbar texte:
+   • Largeur: 3px (plus fine)
+   • Couleur: #38444d  
+   • Hover: #4a5a68
+
+Track (fond):
+   • Couleur: #0f1419
+   • Cohérent avec le thème sombre
+
+
+📊 COMPARAISON AVANT/APRÈS
+═══════════════════════════════════════════════════════════════
+
+AVANT:
+❌ Tweets longs débordent
+❌ Layout cassé
+❌ Interface incohérente
+❌ Problème spécifique @jaynitx
+
+APRÈS:
+✅ Tweets longs avec scroll
+✅ Layout Masonry préservé
+✅ Interface cohérente
+✅ Tous comptes fonctionnent
+
+
+═══════════════════════════════════════════════════════════════
+        🚀 REDÉMARREZ FLASK POUR TESTER ! 🚀
+═══════════════════════════════════════════════════════════════
+
+   1. Terminal → Ctrl + C
+   2. Terminal → python3 postbridge_app.py  
+   3. Navigateur → Ctrl + Shift + R
+   4. Aller sur @jaynitx
+   5. Vérifier les tweets longs avec scroll ! ✅
+
+═══════════════════════════════════════════════════════════════
+

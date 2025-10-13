@@ -1,0 +1,175 @@
+╔═══════════════════════════════════════════════════════════════╗
+║         📊 OÙ SONT STOCKÉES LES MODIFICATIONS ? 📊           ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🗃️ EMPLACEMENT DE LA BASE DE DONNÉES
+═══════════════════════════════════════════════════════════════
+
+Fichier: postbridge_interface/postbridge.db
+Type: Base de données SQLite
+Persistant: ✅ OUI (même après redémarrage)
+
+
+📋 TABLE TWEET_EDITS
+═══════════════════════════════════════════════════════════════
+
+Structure de la table qui stocke TOUTES les modifications :
+
+┌─────────────────┬──────────────────────────────────────┐
+│ Colonne         │ Description                          │
+├─────────────────┼──────────────────────────────────────┤
+│ id              │ ID unique auto-incrémenté            │
+│ account_name    │ Nom du compte (@jaynitx, etc.)       │
+│ tweet_id        │ ID unique du tweet                   │
+│ original_text   │ Texte original du tweet              │
+│ edited_text     │ Texte modifié par vous               │
+│ created_at      │ Date de création de la modification  │
+│ updated_at      │ Date de dernière mise à jour         │
+└─────────────────┴──────────────────────────────────────┘
+
+Contrainte UNIQUE: (account_name, tweet_id)
+→ Un seul enregistrement par tweet
+
+
+🔄 FONCTIONNEMENT
+═══════════════════════════════════════════════════════════════
+
+1️⃣  QUAND VOUS MODIFIEZ UN TWEET:
+
+    • Vous cliquez sur le texte du tweet
+    • Vous modifiez le texte
+    • Vous cliquez sur "Sauvegarder"
+    
+    → La modification est IMMÉDIATEMENT enregistrée dans:
+       • Table tweet_edits (toujours)
+       • Table selected_posts (si le tweet est sélectionné)
+
+
+2️⃣  PERSISTANCE:
+
+    ✅ Les modifications restent même si:
+       • Vous rechargez la page
+       • Vous fermez le navigateur
+       • Vous redémarrez Flask
+       • Vous éteignez l'ordinateur
+    
+    → Tant que postbridge.db existe, les modifications sont là !
+
+
+3️⃣  CONSULTATION:
+
+    Quand vous revenez sur un compte:
+    → Flask charge les modifications depuis tweet_edits
+    → Affiche le texte modifié au lieu de l'original
+    → Tout est automatique !
+
+
+📊 EXEMPLES DE DONNÉES STOCKÉES
+═══════════════════════════════════════════════════════════════
+
+Exemple d'enregistrement dans tweet_edits :
+
+id: 1
+account_name: "jaynitx"
+tweet_id: "1875074212836360227"
+original_text: "combination of these 3 is deadly."
+edited_text: "La combinaison de ces 3 éléments est mortelle. 💀"
+created_at: "2025-10-13 14:23:45"
+updated_at: "2025-10-13 14:23:45"
+
+
+🔍 COMMENT VÉRIFIER VOS MODIFICATIONS
+═══════════════════════════════════════════════════════════════
+
+Option 1 - Via Terminal:
+──────────────────────────────────────────────────────────────
+
+cd /home/cytech/Projects/scraperX/scraper/postbridge_interface
+
+# Voir toutes les modifications
+sqlite3 postbridge.db "SELECT * FROM tweet_edits;"
+
+# Voir les modifications d'un compte spécifique
+sqlite3 postbridge.db "SELECT * FROM tweet_edits WHERE account_name='jaynitx';"
+
+# Compter le nombre de modifications
+sqlite3 postbridge.db "SELECT COUNT(*) FROM tweet_edits;"
+
+
+Option 2 - Via Interface Graphique:
+──────────────────────────────────────────────────────────────
+
+Installer DB Browser for SQLite:
+sudo apt install sqlitebrowser
+
+Ouvrir le fichier:
+sqlitebrowser postbridge_interface/postbridge.db
+
+
+📍 EMPLACEMENTS DES FICHIERS
+═══════════════════════════════════════════════════════════════
+
+Base de données:
+/home/cytech/Projects/scraperX/scraper/postbridge_interface/postbridge.db
+
+Code de gestion:
+/home/cytech/Projects/scraperX/scraper/postbridge_interface/postbridge_app.py
+
+Fonctions importantes:
+• init_db() : Crée les tables
+• update_tweet() : Enregistre les modifications
+• browse_account() : Charge les modifications
+
+
+💡 IMPORTANT
+═══════════════════════════════════════════════════════════════
+
+✅ Les modifications sont enregistrées MÊME si le tweet n'est pas sélectionné
+✅ Elles persistent entre les sessions
+✅ Elles sont automatiquement chargées lors de l'affichage
+✅ Vous ne perdrez jamais vos modifications (sauf si vous supprimez postbridge.db)
+
+
+🎯 CAS D'USAGE
+═══════════════════════════════════════════════════════════════
+
+Scénario 1:
+• Vous modifiez 10 tweets sur @jaynitx
+• Vous fermez le navigateur
+• Demain, vous revenez sur @jaynitx
+→ Les 10 tweets affichent vos modifications ✅
+
+Scénario 2:
+• Vous modifiez un tweet
+• Vous NE le sélectionnez PAS
+• Vous revenez plus tard
+→ La modification est toujours là ✅
+
+Scénario 3:
+• Vous sélectionnez un tweet modifié pour publication
+→ Le texte MODIFIÉ sera posté (pas l'original) ✅
+
+
+⚠️ SAUVEGARDE
+═══════════════════════════════════════════════════════════════
+
+Pour ne jamais perdre vos modifications, sauvegardez:
+
+cp postbridge_interface/postbridge.db postbridge_interface/postbridge.db.backup
+
+Ou régulièrement:
+
+cp postbridge_interface/postbridge.db ~/backups/postbridge_$(date +%Y%m%d).db
+
+
+═══════════════════════════════════════════════════════════════
+          ✅ VOS MODIFICATIONS SONT BIEN ENREGISTRÉES ! ✅
+═══════════════════════════════════════════════════════════════
+
+• Stockage: SQLite (postbridge.db)
+• Persistance: Permanente
+• Récupération: Automatique
+• Sécurité: Locale sur votre machine
+
+═══════════════════════════════════════════════════════════════
+

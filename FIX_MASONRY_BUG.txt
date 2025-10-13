@@ -1,0 +1,81 @@
+╔═══════════════════════════════════════════════════════════════╗
+║           🔧 FIX BUG MASONRY - TWEETS COUPÉS 🔧              ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🐛 PROBLÈME IDENTIFIÉ
+═══════════════════════════════════════════════════════════════
+
+Symptôme:
+   Sur @jaynitx → Stats au milieu du tweet ❌
+   Sur @DearS_o_n → Stats en bas (correct) ✅
+
+Cause:
+   CSS Columns coupe parfois les tweets entre 2 colonnes
+   → Le haut du tweet dans une colonne
+   → Le bas du tweet dans une autre colonne
+
+
+🔧 SOLUTION 1: PROPRIÉTÉS RENFORCÉES ✅
+═══════════════════════════════════════════════════════════════
+
+CSS ajouté:
+   break-inside: avoid;
+   -webkit-column-break-inside: avoid;  ← Safari/Chrome
+   page-break-inside: avoid;             ← Anciens navigateurs
+   overflow: hidden;                     ← Force le contenu
+
+→ Empêche la coupure des tweets
+
+
+⚡ TESTEZ MAINTENANT
+═══════════════════════════════════════════════════════════════
+
+1️⃣  Redémarrez Flask (si pas déjà fait):
+    Ctrl + C
+    python3 postbridge_app.py
+
+2️⃣  Rechargez le navigateur:
+    Ctrl + Shift + R
+
+3️⃣  Testez @jaynitx:
+    Les stats doivent être EN BAS maintenant ✅
+
+
+❓ SI LE BUG PERSISTE
+═══════════════════════════════════════════════════════════════
+
+→ DITES-MOI et je vais implémenter la SOLUTION 2
+
+SOLUTION 2 (Grid Masonry Parfait):
+   Au lieu de CSS Columns (limité)
+   → CSS Grid avec grid-auto-rows: min-content
+   → Garantie ZÉRO coupure
+   → Layout masonry natif
+
+
+🎯 RÉSULTAT ATTENDU
+═══════════════════════════════════════════════════════════════
+
+@jaynitx:
+   ┌──────────────┐
+   │ Tweet text   │
+   │ ............│
+   │              │
+   │ [Images]     │
+   │              │
+   │ ─────────────│ ← Stats en bas !
+   │ 👁️ 6  ❤️ 0   │
+   └──────────────┘
+
+Pas de coupure, stats toujours en bas !
+
+
+═══════════════════════════════════════════════════════════════
+        🚀 REDÉMARREZ FLASK ET TESTEZ ! 🚀
+═══════════════════════════════════════════════════════════════
+
+Si le bug persiste après le test:
+   → Dites-moi "ça marche toujours pas"
+   → J'implémente la Solution 2 (Grid parfait)
+
+═══════════════════════════════════════════════════════════════

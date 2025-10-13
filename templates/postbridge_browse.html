@@ -34,6 +34,13 @@
             font-weight: 700;
         }
         
+        .tweet-count {
+            color: #8b98a5;
+            font-size: 16px;
+            font-weight: normal;
+            margin-left: 8px;
+        }
+        
         .header-actions {
             display: flex;
             gap: 10px;
@@ -100,13 +107,16 @@
         
         .tweet {
             background: #192734;
-            padding: 12px;
+            padding: 0;
             transition: background 0.2s;
             position: relative;
             display: inline-block;
             width: 100%;
             margin-bottom: 1px;
             break-inside: avoid;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
         }
         
         .tweet:hover {
@@ -122,7 +132,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            padding: 8px 12px;
+            flex-shrink: 0;
+        }
+        
+        .tweet-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            min-height: 0;
+        }
+        
+        .tweet-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        
+        .tweet-content::-webkit-scrollbar-track {
+            background: #0f1419;
+        }
+        
+        .tweet-content::-webkit-scrollbar-thumb {
+            background: #38444d;
+            border-radius: 2px;
         }
         
         .tweet-meta {
@@ -259,6 +290,8 @@
             gap: 12px;
             font-size: 12px;
             color: #8b98a5;
+            padding: 8px 12px;
+            flex-shrink: 0;
         }
         
         .stat {
@@ -375,7 +408,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>@{{ account_name }}</h1>
+        <h1>@{{ account_name }} <span class="tweet-count">({{ tweets|length }} tweets)</span></h1>
         <div class="header-actions">
             <button class="btn btn-select-all" onclick="selectAllAccount()">✓ Tout</button>
             <a href="/" class="btn btn-back">← Retour</a>
@@ -434,34 +467,36 @@
                     </div>
                 </div>
                 
-                <div class="tweet-text" 
-                     id="text-{{ tweet.tweet_id }}"
-                     onclick="editTweet('{{ tweet.tweet_id }}')"
-                     title="Cliquer pour modifier">{{ tweet.tweet_text }}</div>
-                <textarea class="tweet-text-edit" 
-                          id="edit-{{ tweet.tweet_id }}" 
-                          style="display: none;">{{ tweet.tweet_text }}</textarea>
-                
-                <div class="edit-actions" id="actions-{{ tweet.tweet_id }}" style="display: none;">
-                    <button class="btn-save" onclick="saveTweet('{{ tweet.tweet_id }}')">Sauvegarder</button>
-                    <button class="btn-cancel" onclick="cancelEdit('{{ tweet.tweet_id }}')">Annuler</button>
-                </div>
-                
-                {% if tweet.has_media and tweet.media_paths %}
-                <div class="tweet-media">
-                    <div class="media-grid count-{{ [tweet.media_paths|length, 4]|min }}">
-                        {% for media_path in tweet.media_paths[:4] %}
-                            {% if media_path.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')) %}
-                                {% set path_only = media_path.split('software_clean/')[-1] %}
-                                <img src="/media/software_clean/{{ path_only }}" 
-                                     alt="Media" 
-                                     onclick="openLightbox('{{ tweet.tweet_id }}', {{ loop.index0 }})"
-                                     onerror="console.error('Image error:', this.src); this.parentElement.style.display='none'">
-                            {% endif %}
-                        {% endfor %}
+                <div class="tweet-content">
+                    <div class="tweet-text" 
+                         id="text-{{ tweet.tweet_id }}"
+                         onclick="editTweet('{{ tweet.tweet_id }}')"
+                         title="Cliquer pour modifier">{{ tweet.tweet_text }}</div>
+                    <textarea class="tweet-text-edit" 
+                              id="edit-{{ tweet.tweet_id }}" 
+                              style="display: none;">{{ tweet.tweet_text }}</textarea>
+                    
+                    <div class="edit-actions" id="actions-{{ tweet.tweet_id }}" style="display: none;">
+                        <button class="btn-save" onclick="saveTweet('{{ tweet.tweet_id }}')">Sauvegarder</button>
+                        <button class="btn-cancel" onclick="cancelEdit('{{ tweet.tweet_id }}')">Annuler</button>
                     </div>
+                    
+                    {% if tweet.has_media and tweet.media_paths %}
+                    <div class="tweet-media">
+                        <div class="media-grid count-{{ [tweet.media_paths|length, 4]|min }}">
+                            {% for media_path in tweet.media_paths[:4] %}
+                                {% if media_path.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')) %}
+                                    {% set path_only = media_path.split('software_clean/')[-1] %}
+                                    <img src="/media/software_clean/{{ path_only }}" 
+                                         alt="Media" 
+                                         onclick="openLightbox('{{ tweet.tweet_id }}', {{ loop.index0 }})"
+                                         onerror="console.error('Image error:', this.src); this.parentElement.style.display='none'">
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
                 
                 <div class="tweet-stats">
                     <div class="stat"><span>👁</span> <span>{{ tweet.views_count|default(0) }}</span></div>
